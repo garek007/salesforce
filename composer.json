@@ -1,0 +1,13 @@
+{
+  "require" : {
+    "guzzlehttp/guzzle": "~6.0"
+  },
+  "require-dev": {
+    "heroku/heroku-buildpack-php": "*"
+  },
+  "autoload": {
+   "psr-4": {
+    "UAB\\": "classes"
+    }
+  }
+}
