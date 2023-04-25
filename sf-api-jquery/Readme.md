@@ -24,7 +24,7 @@ I haven't gotten this to work, even though it theoretically should if you enable
     }
     }).done(function(resp){  
       console.log(resp);
-    });
+    });```
 
 This wouldn't be very secure anyway, but it's there if you have a use case for it. 
 
@@ -46,3 +46,5 @@ You'll need to set up a connected app in CRM in order to get the client id and s
 For the ingest, I've just used a string.
 ```
   let csv = 'Email,LastName,FirstName\r\nbuddy100@elf.com,Elffff,Budddddy';
+
+You'll want to use an array probably or array of objects, but when you do, set a loop to format it like the above. The \r had to be before the \n. I think this also has to do with how you set the line endings, CRLF vs LF, but I didn't test that theory. 
