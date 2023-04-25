@@ -51,4 +51,8 @@ For the ingest, I've just used a string.
   let csv = 'Email,LastName,FirstName\r\nbuddy100@elf.com,Elffff,Budddddy';
 ```
 
-You'll want to use an array probably or array of objects, but when you do, set a loop to format it like the above. The \r had to be before the \n. I think this also has to do with how you set the line endings, CRLF vs LF, but I didn't test that theory. 
+You'll want to use an array probably or array of objects, but when you do, set a loop to format it like the above. The \r had to be before the \n. I think this also has to do with how you set the line endings, CRLF vs LF, but I didn't test that theory. If you're using this for an upload form, I suggest Papaparse, it's a great utility.
+
+Note that the bulkJobStatus function will loop until it gets a confirmation of JobComplete and then it will return, which will allo the code to continue. 
+
+For more information on the Bulk API: https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/bulk_api_2_0.htm
