@@ -56,6 +56,8 @@ $(document).ready(function() {
 //await new Promise(resolve => setTimeout(resolve, delay));  
 
 //turn into a module later https://javascript.info/async-await
+
+ retrieveUpdateSameTime();
  (async () => {
 
 
@@ -287,6 +289,36 @@ async function getContacts(nextRecordsUrl = ''){
 */
 
     });
+}
+
+function retrieveUpdateSameTime(){
+
+
+  $.ajax({
+    url: "https://na123.salesforce.com/services/data/v53.0/composite/batch/",//was ajax-routing.php
+    cache: true,
+    method: "post",
+    dataType:"json",
+    headers:{
+      'Authorization': 'Bearer '+token,
+      'Content-Type': 'application/json',
+    },
+    data:  JSON.stringify({
+    "batchRequests" : [
+        {
+        "method" : "PATCH",
+        "url" : "v53.0/sobjects/account/0013t00001nvOzzAAE",
+        "richInput" : {"Name" : "NewName"}
+        },{
+        "method" : "GET",
+        "url" : "v53.0/sobjects/account/0013t00001nvOzzAAE?fields=Name,BillingPostalCode"
+        }]
+    })
+    }).done(function(resp){ 
+      console.log(resp);
+      
+      
+    });  
 }
 
 </script>        

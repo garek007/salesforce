@@ -64,4 +64,8 @@ The getContacts function uses the batch API. More info here:
 - https://salesforce.stackexchange.com/questions/146874/using-jquery-to-perform-a-composite-ajax-request
 - https://medium.com/@charlie_77818/querying-large-ish-datasets-fast-and-efficiently-with-salesforces-composite-resources-3f614dbca111
 
-The composite part is commented out. I had it working at one point. Check the last article for how to do it. Eventually I'll come back and set it up, I just need to get it out of my tabs for now. 
+The composite part is commented out. I had it working at one point. Check the last article for how to do it. Eventually I'll come back and set it up, I just need to get it out of my tabs for now. To use it, you'll need to break it apart. I just did what I did there as a proof of concept.
+
+### This looked cool so...
+- https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_composite_batch.htm#topic-title
+The retrieveUpdateSameTime() shows how to set that up. You'll need to use your own account id from your own dev org.
