@@ -56,3 +56,12 @@ You'll want to use an array probably or array of objects, but when you do, set a
 Note that the bulkJobStatus function will loop until it gets a confirmation of JobComplete and then it will return, which will allo the code to continue. 
 
 For more information on the Bulk API: https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/bulk_api_2_0.htm
+
+### Composite Batch API
+The getContacts function uses the batch API. More info here: 
+-https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_batch.htm
+-https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_composite.htm
+-https://salesforce.stackexchange.com/questions/146874/using-jquery-to-perform-a-composite-ajax-request
+-https://medium.com/@charlie_77818/querying-large-ish-datasets-fast-and-efficiently-with-salesforces-composite-resources-3f614dbca111
+
+The composite part is commented out. I had it working at one point. Check the last article for how to do it. Eventually I'll come back and set it up, I just need to get it out of my tabs for now. 

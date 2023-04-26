@@ -178,6 +178,117 @@ async function bulkJobStatus(jobid,type){
 
 }
 
+
+async function getContacts(nextRecordsUrl = ''){
+
+  if(nextRecordsUrl == ''){
+    var endpoint = 'https://'+instance+'.salesforce.com/services/data/v'+version+'/query/';
+  }else{
+    var endpoint = 'https://'+instance+'.salesforce.com'+nextRecordsUrl;
+  }
+  console.log("endpoint "+endpoint);
+
+  
+  //var token = sessionStorage.getItem("access_token");
+
+  //let cc = await doAjaxAsync({csvstring:bulkAPIObject.contacts.slice(0,-3).replace(/[\r\n]/gm, ''),bid:$('#blazerid').val()},endpoints.contacts,"json");
+  
+  $.ajax({
+    url: endpoint,//was ajax-routing.php
+    cache: true,
+    method: "get",
+    dataType:"json",
+    headers:{
+      'Authorization': 'OAuth '+token,
+      'Content-Type': 'application/json',
+    },
+    data: {
+      q:'SELECT Id,Email FROM Contact'
+    }
+    }).done(function(resp){  
+        console.log(resp);
+        console.log(resp.records);
+        console.log(originalCSVArray);
+        crmContacts = crmContacts.concat(resp.records);
+        if(resp.done == false){
+          getContacts(resp.nextRecordsUrl);
+        }else{
+          console.log("length "+crmContacts.length)
+          console.log(crmContacts);
+        }/*
+
+
+        //let response = query('SELECT Id, Name FROM Account LIMIT 52000');
+        let baseNextUrl = resp.nextRecordsUrl.split('-')[0];
+        let nextUrls = [];
+        
+        for(let i = 1; i < resp.totalSize / 2000; i++){
+          let obj = {};
+              obj.method = "GET";
+              obj.url = `${baseNextUrl}-${i*2000}`;
+          nextUrls.push(obj);
+        }
+        console.log(nextUrls);
+        console.log(JSON.stringify(nextUrls));
+
+
+
+        $.ajax({
+          url: "https://na123.salesforce.com/services/data/v53.0/composite/batch/",//was ajax-routing.php
+          cache: true,
+          method: "post",
+          dataType:"json",
+          headers:{
+            'Authorization': 'Bearer '+token,
+            'Content-Type': 'application/json',
+          },
+          data:  JSON.stringify({
+            "batchRequests": nextUrls
+          })
+          }).done(function(resp2){ 
+            console.log(resp2);
+            
+            
+          });
+
+/*
+
+
+        resp.records.forEach((contact) => { 
+         // console.log(contact);
+
+          let found = originalCSVArray.find(row => row[0] == contact.Email);
+          if(found !== undefined){
+            console.log("found length "+found.length);
+
+            let deObject = {};
+            deObject.SubscriberKey = contact.Id;
+            deObject.AttendeeID = contact.Id;
+            found.forEach((element, index) => { 
+              console.log("header "+originalCSVHeaders[index]+ " "+ element);
+              deObject[originalCSVHeaders[index].replace(" ","")] = element;
+            });
+            jsonForDE.items.push(deObject);
+            
+            var row = {};
+            row.subscriberkey = contact.Id;
+            row.email = contact.Email;
+            row.firstName = found[1];
+            row.lastName = found[2];
+            addTableRowSingle(row);
+          }
+          
+
+
+        });
+        console.log(JSON.stringify(jsonForDE));
+        createDataExtension(jsonForDE);
+        //Object.assign(contactQueryResults,queryresults.results);
+*/
+
+    });
+}
+
 </script>        
       
 
