@@ -69,3 +69,9 @@ The composite part is commented out. I had it working at one point. Check the la
 ### This looked cool so...
 - https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_composite_batch.htm#topic-title
 The retrieveUpdateSameTime() shows how to set that up. You'll need to use your own account id from your own dev org.
+
+### Sans jQuery
+fetch-api.php has an example of doing this using the [fetch api](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) and no jquery.
+
+
+
