@@ -1,0 +1,211 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Playground</title>
+    <link rel="stylesheet" href="https://yourdomain.mail.somewhere.com/slds">
+    <style>
+      #emails li{
+        cursor: pointer;
+      }
+      #emails li:hover{
+        background-color: #dddbda;
+      }
+    </style>
+  </head>
+  <body>
+   
+      <div class="slds-spinner_container slds-is-fixed slds-hidden" id="spinner">
+      <div role="status" class="slds-spinner slds-spinner_medium">
+      <span class="slds-assistive-text">Loading</span>
+      <div class="slds-spinner__dot-a"></div>
+      <div class="slds-spinner__dot-b"></div>
+      </div>
+      </div>
+  
+
+      <div class="slds-theme--default slds-container_x-large slds-container_center slds-m-top_x-large slds-m-bottom_x-large">
+        <div class="slds-grid slds-wrap">
+          <nav class="slds-col slds-size_1-of-1">
+            Page Header Component
+          </nav>
+          <main class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4">
+            <div class="slds-form-element">
+              <label class="slds-form-element__label" for="select-01">Select Label</label>
+              <div class="slds-form-element__control">
+              <div class="slds-select_container">
+              <select class="slds-select" id="campaign-select">
+              <option value="">Select Email</option>
+              <option value="GNJ-">Global Nurture Journey</option>
+              <option>Option Two</option>
+              <option>Option Three</option>
+              </select>
+              </div>
+              </div>
+              </div>            
+            <ul id="emails" class="slds-list_dotted slds-has-dividers_bottom-space slds-has-block-links_space">
+     
+            </ul>
+          </main>
+          <aside class="slds-col slds-size_1-of-1 slds-medium-size_3-of-4">
+            <iframe id="renderedemail" frameborder="0" width="650" height="900"></iframe>
+          </aside>
+          <nav class="slds-col slds-size_1-of-1">
+            Card Component
+          </nav>
+        </div>
+     </div>
+
+
+
+<!--
+      For previewing against a subscriber list
+/guide/v1/emails/{EMAIL_ID}/lists/{LIST_ID}/contacts/{CONTACT_ID}/preview
+For previewing against a Data Extension
+/guide/v1/emails/{EMAIL_ID}/dataExtension/{DATAEXTENSION_GUID}/row/{ROW_NUMBER}/preview
+-->
+      <script>
+
+        const categoryParams = {
+          gnj:{
+            objectid:"3a755175-a70f-ee11-a5c8-5cba2cxxxxxx",
+            row:11
+          }
+        };
+
+        document.querySelector('#campaign-select').addEventListener('change',function(){
+          retrieve(this.value);
+          //retrieveDERows();
+        });     
+        //sessionStorage.setItem("token", "%%=v(@token)=%%");
+        let ul = document.getElementById("emails");
+          ul.onclick = renderEmail;
+        var baseURL = 'https://yourdomain.mail.somewhere.com';
+
+        
+        (async () => {
+          console.log("generic function!");
+          //compile(item,'html');
+          //renderEmail(objectid,item.legacyData.legacyId,deRow);
+        })();
+        function test(event){
+          console.log(event.target.id);
+          //if (target.tagName != 'TD') return; // not on TD? Then we're not interested
+          //let target = event.target; // where was the click?
+          //highlight(target); // highlight it          
+        }
+        async function retrieveDERows(){
+          const response = await fetch(baseURL+'/assetretrieve?' + new URLSearchParams({
+            function: 'retrieveDataExtensionRowsWithFilter'
+          }));
+          const jsonData = await response.json();
+          console.log(jsonData);
+
+        }        
+        async function retrieve(prefix){
+          const response = await fetch(baseURL+'/assetretrieve?' + new URLSearchParams({
+            prefix: prefix,
+            function:"retrieveEmails"
+          }));
+          const jsonData = await response.json();
+          let item = jsonData.items[0];
+          console.log(item);
+          jsonData.items.forEach(element => {
+
+            //var name = names[i];
+            var li = document.createElement('li');
+            li.className = 'slds-item';
+            li.id = element.legacyData.legacyId;
+            li.setAttribute('data-category',prefix.replace('-','').toLowerCase());//set category
+            li.appendChild(document.createTextNode(element.name));
+
+            ul.appendChild(li);
+
+              //let div = document.createElement('div');
+              //div.className = "link";
+              //ul.innerHTML = '<li id="'+element.legacyData.legacyId+'">'+element.name+'</li>';
+              //document.body.append(div);
+            //console.log(element)
+          });
+        }
+        function showSpinner(){
+          let s = document.getElementById('spinner');
+          s.classList.remove('slds-hidden');
+        }
+        function hideSpinner(){
+          let s = document.getElementById('spinner');
+          s.classList.add('slds-hidden');          
+        }
+        function getRows(){
+          
+        }
+        async function renderEmail(event){
+          showSpinner();
+          let legacyId = event.target.id;
+          let category = event.target.getAttribute("data-category");//https://gomakethings.com/how-to-get-set-and-remove-data-attributes-with-vanilla-javascript/
+          let objectid = categoryParams[category].objectid;
+          let row = categoryParams[category].row;
+        
+          var renderURL = baseURL + '/render?objectid='+objectid+'&legacyid='+legacyId+'&row='+row;
+          const render = await fetch(renderURL);
+          const jsonRenderData = await render.text();
+          let iframe = document.getElementById('renderedemail');
+          iframe.src="https://yourdomain.mail.somewhere.com/render?objectid="+objectid+"&legacyid="+legacyId+"&row="+row;
+          iframe.onload = function(){
+            console.log("loaded iframe. Resizing to "+iframe.contentWindow.document.body.scrollHeight+'px')
+            iframe.height = iframe.contentWindow.document.body.scrollHeight + "px";
+            hideSpinner();
+          }
+          
+          //console.log(jsonRenderData);
+        }
+        function getReferences(content, type) {
+          var typeMarker = '<div data-type="' + type + '" data-key="';
+          var splitContent = content.split(typeMarker);
+          var results = [];
+          if (splitContent.length > 1) {
+            for (var i = 1; i < splitContent.length; i++) {
+              var endTagMatches = splitContent[i].match(/(\/>)|(>[^<]*<\/div>)/i);
+              var match = endTagMatches[0] || ">";
+              results.push(typeMarker + splitContent[i].split(match)[0] + match);
+            }
+          }
+          return results;
+        }
+        
+        function compile(asset, channel) {
+
+          console.log(asset.content);
+          asset = asset || {};
+          var content = asset.superContent || asset.content || asset.design;
+         
+          if (content) {
+            ["slot", "block"].forEach(function (type) {
+              var references = getReferences(content, type);
+              var types = type + "s";
+              references.forEach(function (reference) {
+                var refKey = reference.split('data-key="')[1].split('"')[0];
+                if (asset[types] && asset[types][refKey]) {
+                  content = content.replace(reference, compile(asset[types][refKey]));
+                } else {
+                  console.error(
+                    "Bad Asset: referenced " + type + " does not exist: " + refKey
+                  );
+                }
+              });
+            });
+            return content;
+          } else if (asset.views) {
+            if (asset.views[channel]) {
+              return compile(asset.views[channel], channel);
+            } else if (asset.views.html) {
+              return compile(asset.views.html, channel);
+            }
+          }
+          return "";
+        }
+       
+      </script>
+  </body>
+</html>
