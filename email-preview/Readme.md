@@ -16,3 +16,6 @@ You'll need three CloudPages.
 - You'll need one CloudPage for your functions /assetretrieve
   - In the past, I've broken up functionality into separate CloudPages, one page for each thing, but I decided instead to drop all my functions into one page and use a switch statement to pick which one I need. More efficient than having so many CloudPages out there, since they aren't easy to navigate.
 
+  ### References
+  I found this SE post very handy. https://salesforce.stackexchange.com/questions/301320/retrieving-and-displaying-the-records-from-a-data-extension-using-ssjs-or-wsprox
+
