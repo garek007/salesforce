@@ -19,3 +19,5 @@ You'll need three CloudPages.
   ### References
   I found this SE post very handy. https://salesforce.stackexchange.com/questions/301320/retrieving-and-displaying-the-records-from-a-data-extension-using-ssjs-or-wsprox
 
+  ### Again use at your own risk. See Mark's comment at the end of this post.
+  https://salesforce.stackexchange.com/questions/159520/get-preview-of-email-with-ampscript-using-rest-api
