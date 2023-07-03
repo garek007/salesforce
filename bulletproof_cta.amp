@@ -1,0 +1,54 @@
+%%[
+Set @styles = 'border-radius: 5px;border-style:solid;display: inline-block; mso-padding-alt: 0;font-weight: bold;font-family: Helvetica, Arial, sans-serif;text-decoration: none;'
+if Empty(@theme) then
+  Set @buttonColor = '#0176D3'
+  Set @borderColor = '#0176D3'
+  Set @labelColor = '#FFFFFF'
+else
+  if @theme == 'inverted' then
+    Set @buttonColor = '#FFFFFF'
+    Set @borderColor = @themeColor
+    Set @labelColor = @themeColor
+    Set @styles = Concat(@styles,'border-width:3px;')
+  endif
+endif
+Set @fSize = IIF(Empty(@fontSize),'13px',@fontSize)
+Set @bWidth = IIF(Empty(@width),'200px',@width)
+
+
+Set @tbpad = IIF(Empty(@topbottompadding),'5%',@topbottompadding)
+Set @spad = IIF(Empty(@sidepadding),'10%',@sidepadding)
+
+IF Empty(@msoLineHeight) Then
+    /*First trim the number out*/
+    Set @lineHeightNumber = Substring(@lineHeight,Subtract(Length(@lineHeight),2),2)
+    Set @msoLineHeight = IIF(IndexOf(@msoLabel,'<br>')>0,Concat(Multiply(@lineHeightNumber,2),'px'),Concat(@lineHeightNumber,'px'))
+endif
+
+Set @styles = Concat(@styles,'padding: ',@tbpad,' ',@spad,';')
+
+Set @styles = Concat(@styles,'background-color:',@buttonColor,";")
+Set @styles = Concat(@styles,'border-color:',@borderColor,';')
+Set @styles = Concat(@styles,'font-size:',@fSize,";")
+Set @styles = Concat(@styles,'color: ',@labelColor,' !important;')
+/* note that the table is not necessary but we are wrapping the button in a table so that we can make sure the button is centered in the column*/
+
+]%%
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
+  <tr>
+   <td align="center" style="%%=Concat('color: ',@labelColor,' !important;')=%%">
+      <a rel="noopener" target="_blank" href="%%=RedirectTo(@link)=%%" style="%%=v(@styles)=%%">
+          <!--[if mso]>
+          <i style="letter-spacing: 25px; mso-font-width: -100%; mso-text-raise: 30pt;">&nbsp;</i>
+          <![endif]-->
+          <span style="mso-text-raise: 15pt;%%=Concat('color: ',@labelColor,' !important;')=%%"><font color="%%=v(@labelColor)=%%">%%=v(@label)=%%</font></span>
+          <!--[if mso]>
+          <i style="letter-spacing: 25px; mso-font-width: -100%;">&nbsp;</i>
+          <![endif]-->
+      </a>
+    </td>
+  </tr>
+</table>
+
+
