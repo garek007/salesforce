@@ -6,7 +6,7 @@ Set @fontSize = '16px'
 Set @lineHeight = '20px'
 Set @msoLineHeight = '32px'
 Set @label = 'Reactivate Access' 
-Set @link = CloudPagesURL(6433,'emailAddr',emailaddr,'_subscriberkey',_subscriberkey,'subscriberid',subscriberid,'jobid',jobid,'MemberID',MemberID,'listid',listid,'_JobSubscriberBatchID',_JobSubscriberBatchID,'joburlid',joburlid,'FirstName',FirstName,'language',Language) 
+Set @link = CloudPagesURL(1234,'emailAddr',emailaddr,'_subscriberkey',_subscriberkey,'subscriberid',subscriberid,'jobid',jobid,'MemberID',MemberID,'listid',listid,'_JobSubscriberBatchID',_JobSubscriberBatchID,'joburlid',joburlid,'FirstName',FirstName,'language',Language) 
 Output(ContentBlockById(@blueCTA))
 ]%%
 ```
