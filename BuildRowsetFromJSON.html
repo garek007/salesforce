@@ -1,0 +1,73 @@
+%%[
+    Set @json = 
+    '{
+        "leftcolumn":[
+        {
+            "header":"Learn About Salesforce and Our Values.",
+            "icon":"1f4d7",
+            "alias":"learn about salesforce and our values",
+            "link":"https://trailhead.salesforce.com/en/content/learn/modules/salesforce-quick-look-1/learn-about-salesforce-and-our-values?source=Email_RM",
+            "blurb":"Quick &ndash; What are Salesforce&rsquo;s core values? Understand how our values create value and guide everything we do as a company and as people."
+        },
+        {
+            "header":"Resume Writing and Interviewing",
+            "icon":"1F4DD",
+            "alias":"resume writing and interviewing",
+            "link":"https://trailhead.salesforce.com/en/users/learning-development/trailmixes/resume-writing-and-interviewing?source=Email_RM",
+            "blurb":"Learn how to ace that interview and make your resume stand out with these custom modules from our Learning and Development team."
+        }],
+        "leftcolumndynamic":[{
+            "csg":[
+            {
+                "header":"Salesforce Architect: Quick Look",
+                "icon":"1F4D3",
+                "alias":"csg course",
+                "link":"https://trailhead.salesforce.com/content/learn/modules/salesforce-architect-role-quick-look?trailmix_creator_id=ruth-the-architect&trailmix_slug=salesforce-architect-careers&source=Email_RM",
+                "blurb":"Learn more about what Salesforce architects do and the skills they need to succeed."
+            }],
+            "tech":[
+            {
+                "header":"Strategies for Successful Software Engineering Interviews.",
+                "icon":"1F4D3",
+                "alias":"engineering course",
+                "link":"https://trailhead.salesforce.com/en/content/learn/modules/strategies-for-successful-software-engineer-interviews?source=Email_RM",
+                "blurb":"Learn more about software engineering at Salesforce &mdash; plus get insider knowledge on how to ace those
+                interviews."
+            }],
+            "sales":[
+            {
+                "header":"Build Your Sales Career",
+                "icon":"1F4D3",
+                "alias":"build your sales career",
+                "link":"https://trailhead.salesforce.com/en/content/learn/trails/build-your-sales-career?source=Email_RM",
+                "blurb":"Learn from the experts at Salesforce about how to succeed in the challenging and rewarding world of sales."
+            }]                
+        }],       
+        "rightcolumn":[
+        {
+            "whatevs":"yo yo yo"
+        }]
+     }'
+
+     
+
+
+Set @jsonRows = BuildRowsetFromJson(@json,'$.leftcolumn[*]',1)
+     if RowCount(@jsonRows) > 0 then ]%%
+     <ul style="padding:0; margin:0 0 0 15px; list-style-type:none;">%%[
+        for @li = 1 to RowCount(@jsonRows) do 
+            set @row = Row(@jsonRows,@li)
+
+        ]%%
+        <li style="list-style-type: '\%%=Field(@row,'icon')=%%';padding:10px;">
+            <a alias="%%=Field(@row,'alias')=%%" conversion="false" data-linkto="https://" href="%%=RedirectTo(Field(@row,'link'))=%%" style="color:#032D60;text-decoration:none;font-size:21px;line-height:30px;font-weight:bold;" target="_blank" title="%%=Field(@row,'alias')=%%">%%=Field(@row,'header')=%%</a>
+            <br>
+            <div style="line-height: 150%;">   
+                %%=Field(@row,'blurb')=%%
+           <a alias="%%=Concat(Field(@row,'alias'),' Learn More')=%%" conversion="false" data-linkto="https://" href="%%=RedirectTo(Field(@row,'link'))=%%" style="color:#032D60;text-decoration:none;" title="Learn More >">Learn&nbsp;More&nbsp;&gt;&gt;</a>
+            </div>            
+        </li>
+        %%[ next @li ]%%
+    </ul> %%[
+     endif
+     ]%%
