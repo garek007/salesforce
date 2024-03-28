@@ -1,8 +1,8 @@
 %%[
 Set @styles = 'border-radius: 5px;border-style:solid;display: inline-block; mso-padding-alt: 0;font-weight: bold;font-family: Helvetica, Arial, sans-serif;text-decoration: none;'
 if Empty(@theme) then
-  Set @buttonColor = '#0176D3'
-  Set @borderColor = '#0176D3'
+  Set @buttonColor = IIF(Empty(@buttonColor),'#0176D3',@buttonColor)
+  Set @borderColor = IIF(Empty(@borderColor),'#0176D3',@borderColor)
   Set @labelColor = '#FFFFFF'
 else
   if @theme == 'inverted' then
@@ -13,7 +13,7 @@ else
   endif
 endif
 Set @fSize = IIF(Empty(@fontSize),'13px',@fontSize)
-Set @bWidth = IIF(Empty(@width),'200px',@width)
+
 
 
 Set @tbpad = IIF(Empty(@topbottompadding),'5%',@topbottompadding)
@@ -31,6 +31,10 @@ Set @styles = Concat(@styles,'background-color:',@buttonColor,";")
 Set @styles = Concat(@styles,'border-color:',@borderColor,';')
 Set @styles = Concat(@styles,'font-size:',@fSize,";")
 Set @styles = Concat(@styles,'color: ',@labelColor,' !important;')
+if Not Empty(@width) then
+
+  Set @styles = Concat(@styles,'width: ',@width,';')
+endif
 /* note that the table is not necessary but we are wrapping the button in a table so that we can make sure the button is centered in the column*/
 
 ]%%
@@ -38,7 +42,7 @@ Set @styles = Concat(@styles,'color: ',@labelColor,' !important;')
 <table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
   <tr>
    <td align="center" style="%%=Concat('color: ',@labelColor,' !important;')=%%">
-      <a rel="noopener" target="_blank" href="%%=RedirectTo(@link)=%%" style="%%=v(@styles)=%%">
+      <a rel="noopener" alias="%%=v(@alias)=%%" target="_blank" href="%%=RedirectTo(@link)=%%" style="%%=v(@styles)=%%">
           <!--[if mso]>
           <i style="letter-spacing: 25px; mso-font-width: -100%; mso-text-raise: 30pt;">&nbsp;</i>
           <![endif]-->
