@@ -1,0 +1,62 @@
+<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Header>
+        <Action>Create</Action>
+        <To>https://{{subdomain}}.soap.marketingcloudapis.com/Service.asmx</To>
+        <fueloauth xmlns="http://exacttarget.com">{{dne_etAccessToken}}</fueloauth>
+    </Header>
+    <Body>
+        <CreateRequest xmlns="http://exacttarget.com/wsdl/partnerAPI">
+            <Options></Options>
+            <Objects xmlns:ns1="http://exacttarget.com/wsdl/partnerAPI" xsi:type="ns1:DataExtension">
+                <CustomerKey>Unsubscribe_Data_View</CustomerKey>
+                <Name>Unsubscribe_Data_View</Name>
+                <IsSendable>false</IsSendable>
+                <Fields>
+                    <Field>
+                        <Name>JobID</Name>
+                        <FieldType>Number</FieldType>
+                    </Field>
+                    <Field>
+                        <Name>OYBAccountID</Name>
+                        <FieldType>Number</FieldType>
+                    </Field>
+                    <Field>
+                        <Name>AccountID</Name>
+                        <FieldType>Number</FieldType>
+                    </Field>
+                    <Field>
+                        <Name>ListID</Name>
+                        <FieldType>Number</FieldType>
+                    </Field>
+                    <Field>
+                        <Name>BatchID</Name>
+                        <FieldType>Number</FieldType>
+                    </Field>
+                    <Field>
+                        <Name>SubscriberID</Name>
+                        <FieldType>Number</FieldType>
+                    </Field>
+                    <Field>
+                        <Name>SubscriberKey</Name>
+                        <FieldType>Text</FieldType>
+                        <MaxLength>254</MaxLength>
+                    </Field> 
+                    <Field>
+                        <Name>EventDate</Name>
+                        <FieldType>Date</FieldType>
+                    </Field> 
+                    <Field>
+                        <Name>IsUnique</Name>
+                        <FieldType>Boolean</FieldType>
+                    </Field>                     
+                  
+                    <Field>
+                        <Name>Domain</Name>
+                        <FieldType>Text</FieldType>
+                        <MaxLength>128</MaxLength>
+                    </Field>                                                                                                                                           
+                </Fields>
+            </Objects>
+        </CreateRequest>
+    </Body>
+</Envelope>
