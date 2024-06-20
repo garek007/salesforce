@@ -1,0 +1,96 @@
+%%[
+    Set @stories = '{
+        "stories":[
+            {
+            "title":"Lessons in Leadership from a Customer Success Trailblazer",
+            "alias":"lessons in leadership",
+            "img":"https://image.mail.salesforce.com/lib/fe8f1c72746d0d7d76/m/1/c8917519-c864-4787-ad79-28d8d76daae9.jpg",
+            "link":"https://careers.salesforce.com/en/salesforce-stories/leadership-development/lessons-in-leadership-from-a-customer-success-trailblazer/"
+            },
+            {
+            "title":"Crafting a Career Centered on Customer Success",
+            "alias":"crafting a career on customer success",
+            "img":"https://image.mail.salesforce.com/lib/fe8f1c72746d0d7d76/m/1/a1423ba2-c7e1-4120-b262-581e495a7585.jpg",
+            "link":"https://careers.salesforce.com/en/salesforce-stories/customer-success/crafting-a-career-centered-on-customer-success/"
+            },
+            {
+            "title":"Career Break to Breakthrough: Finding Place and Purpose at Salesforce",
+            "alias":"career break to breakthrough",
+            "img":"https://image.mail.salesforce.com/lib/fe8f1c72746d0d7d76/m/1/18fc41a9-6084-44e3-93d6-58ca1db9cdbe.jpg",
+            "link":"https://careers.salesforce.com/en/salesforce-stories/career-growth/from-career-break-to-breakthrough-finding-place-and-purpose-at-salesforce/"
+            }                  
+        ]
+    }'
+        
+
+    set @jsonRowset = BuildRowSetFromJson(@stories, '$.stories[*]',1)
+
+    if RowCount(@jsonRowset) > 0 then
+        for @i = 1 to RowCount(@jsonRowset) do 
+            set @image = Field(Row(@jsonRowset,@i),'img')
+        ]%%
+
+
+
+<table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="min-width: 100%; "
+    class="stylingblock-content-wrapper">
+    <tr>
+        <td style="padding: 20px; " class="stylingblock-content-wrapper camarker-inner">
+            <table cellspacing="0" cellpadding="0" role="presentation" style="width: 100%;">
+                <tr>
+                    <td>
+        <table cellspacing="0" cellpadding="0" role="presentation" style="width: 100%;">
+            <tr>
+                <td valign="top" class="responsive-td" style="width: 50%; padding-right: 5px;">
+                    <table cellpadding="0" cellspacing="0" width="100%" role="presentation"
+                        style="min-width: 100%; " class="stylingblock-content-wrapper">
+                        <tr>
+                            <td class="stylingblock-content-wrapper camarker-inner">
+                                <table width="100%" cellspacing="0" cellpadding="0" role="presentation">
+                                    <tr>
+                                        <td align="center">
+                                            <img data-assetid="675385"
+                                                src="%%=v(@image)=%%"
+                                                alt="%%=Field(Row(@jsonRowset,@i),'alias')=%%" height="150" width="250"
+                                                style="display: block; padding: 0px; text-align: center; height: 150px; width: 100%; border: 0px;">
+          
+
+
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td valign="top" class="responsive-td" style="width: 50%; padding-left: 5px;">
+                    <table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="min-width: 100%;" class="stylingblock-content-wrapper">
+                        <tr>
+                            <td class="stylingblock-content-wrapper camarker-inner story-title" style="padding-top:10px;padding-left:10px;line-height:150%;">
+                                    <a
+                                    alias="%%=Field(Row(@jsonRowset,@i),'alias')=%%"
+                                    title="%%=Field(Row(@jsonRowset,@i),'title')=%%"
+                                    href="%%=RedirectTo(Field(Row(@jsonRowset,@i),'link'))=%%"
+                                    style="color:#215CA1;text-decoration:none;line-height:150%;font-size:20px;">
+                                    %%=Field(Row(@jsonRowset,@i),'title')=%%
+                                    </a>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+%%[     next @i
+
+    else
+        set @errormsg = "There were no stories found. Check your JSON"
+        Output(v(@errormsg))
+    endif
+]%%
