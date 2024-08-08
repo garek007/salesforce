@@ -96,3 +96,81 @@ Custom string prototype to strip spaces, the hidden BOM character (), and the no
 String.prototype.trim = function () {
    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, "");
 };
+
+
+
+
+
+//eliot's 
+
+
+function CheckCampaignMember(id) {
+   var amp = '%' + '%[set @rows = RetrieveSalesforceObjects('; 
+   amp += '\'CampaignMember\',';
+   amp += '\'Id\',';
+   amp += '\'CampaignId\',';
+   amp += '\'=\',';
+   amp += '\'' + cid + '\',';
+   amp += '\'LeadOrContactId\',';
+   amp += '\'=\',';
+   amp += '\'' + id + '\')';
+   amp += 'set @cmId = iif(RowCount(@rows)==0, null, Field(Row(@rows, 1), \'Id\'))';
+   amp += 'Output(Concat(@cmId))';
+   amp += ']%' + '%';
+   
+   var val = Platform.Function.TreatAsContent(amp);
+   return val; // returns campaign member id, or null if no record found
+ }
+ 
+ function CreateSalesforceObject(obj, arr) {
+   var amp = '%' + '%=CreateSalesforceObject('; 
+   amp += '\'' + obj + '\',';
+   amp += '\'' + arr.length + '\',';
+ 
+   for (var i = 0; i < arr.length; i++) {
+     amp += '\'' + arr[i].name + '\',';
+     amp += '\'' + arr[i].value + '\'';
+     if (i !== arr.length-1) {
+       amp += ',';
+     }
+   }
+   amp += ')' + '=%' + '%';
+   var val = Platform.Function.TreatAsContent(amp);
+   return val;
+ }
+ 
+ function UpdateSingleSalesforceObject(obj, id, arr) {
+   var amp = '%' + '%=UpdateSingleSalesforceObject('; 
+   amp += '\'' + obj + '\',';
+   amp += '\'' + id + '\',';
+ 
+   for (var i = 0; i < arr.length; i++) {
+     amp += '\'' + arr[i].name + '\',';
+     amp += '\'' + arr[i].value + '\'';
+     if (i !== arr.length-1) {
+       amp += ',';
+     }
+   }
+   amp += ')' + '=%' + '%';
+   var val = Platform.Function.TreatAsContent(amp);
+   return val;
+ }
+ 
+ function currentIsoDateTime() {
+   var amp = '%' + '%=FormatDate(Now(),\'iso\''; 
+   amp += ')' + '=%' + '%';
+   
+   var val = Platform.Function.TreatAsContent(amp);
+   return val;
+ }
+ 
+ // polyfill
+ function includes(val,arr) {
+   var res = false;
+   for(var i=0; i < arr.length; i++) {
+     if (!res) {
+       res = (val == arr[i]) ? true : false;
+     }
+   }
+   return res;
+ }
