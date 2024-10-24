@@ -152,10 +152,11 @@ function checkForStoredToken(system){
 			}
 		];
 
-		var result = prox.createItem('DataExtensionObject', {
-			CustomerKey: dataExtensions.tokenstorage,
-			Properties: props
-		});	
+	        var options = {SaveOptions: [{'PropertyName': '*', SaveAction: 'UpdateAdd'}]};  
+	        var result = prox.updateItem('DataExtensionObject', {
+	            CustomerKey: dataExtensions.tokenstorage,
+	            Properties: props
+	        },options);		
 		return token;	
 	}else{
 		return existingToken
