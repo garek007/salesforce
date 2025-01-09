@@ -53,6 +53,44 @@ function UpdateSingleSalesforceObject(object,objectid,fields){
       amp+= "]\%\%";
       return Platform.Function.TreatAsContent(amp);
 }
+/**
+ * Enables the AMP function RetrieveSalesforceObjects in SSJS
+ *
+ * This function retrieves fields from a record in a Sales or Service Cloud 
+ * standard or custom object. The function returns a row set of fields.
+ *
+ * NOTE: Additional API field name, comparison operator and value sets can 
+ * be appended as arguments. However the function joins these additional sets using AND clauses.
+ *
+ * NOTE: This function should only be used in applications that do not require a high volume 
+ * of requests or return a large number of records; for example, an email send to a small 
+ * audience, a Triggered Send, or the retrieval of a single record on a landing page.
+ *
+ * NOTE: The function may take several seconds to execute, impacting email send performance 
+ * and may result in a timeout if the request volume is high for example; using a process 
+ * loop to execute the function multiple times or returning a large number of rows. Unlike 
+ * other AMPscript functions that return a row set — for example, LookupRows which limits 
+ * the number of rows to 2000 — there is not the same type of limitation on the number of 
+ * rows returned by this function.
+ * 
+ *
+ * @param  {string}    sfObject        API name of the Salesforce object.
+ * @param  {array}     fieldNames      Comma-separated array of API field names to retrieve
+ * @param  {array}     parameters      Set of arrays where each array is one set of filter
+ *                                     <br/>1: API field name to match record
+ *                                     <br/>2: Comparison operator for matching records. Valid operators include:
+ *                                        <br/> = equal to
+ *                                        <br/> < less than
+ *                                        <br/> > greater than
+ *                                        <br/> != not equal to
+ *                                        <br/> <= less than or equal to
+ *                                        <br/> >= greater than or equal to
+ *                                     <br/>3: Value to match record using comparison operator in 2
+ *
+ * @returns {object} The result of the request
+ *
+ * @see {@link https://ampscript.guide/retrievesalesforceobjects/|RetrieveSalesforceObjects}
+ */
 function RetrieveSalesforceObjects(sfObject,fieldNames,parameters) {
     var varName = '@amp__RetrieveSalesforceObjects';
 
