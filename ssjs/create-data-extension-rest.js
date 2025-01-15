@@ -1,4 +1,7 @@
 <script runat="server">
+
+    //Using this section as boilerplate, more http functions here
+    //https://developer.salesforce.com/docs/marketing/marketing-cloud/guide/ssjs_platformHTTPPropertyFunctions.html
 //Platform.Load("core","1");
 //HTTPHeader.SetValue("Access-Control-Allow-Methods","POST");
 //HTTPHeader.SetValue("Access-Control-Allow-Origin","*");
