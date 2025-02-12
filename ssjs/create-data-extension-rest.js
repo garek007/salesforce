@@ -1,7 +1,4 @@
 <script runat="server">
-
-    //Using this section as boilerplate, more http functions here
-    //https://developer.salesforce.com/docs/marketing/marketing-cloud/guide/ssjs_platformHTTPPropertyFunctions.html
 //Platform.Load("core","1");
 //HTTPHeader.SetValue("Access-Control-Allow-Methods","POST");
 //HTTPHeader.SetValue("Access-Control-Allow-Origin","*");
@@ -9,41 +6,51 @@
 //HTTPHeader.GetValue('host') 
 var method = Platform.Request.Method();
 var refURL = Platform.Request.ReferrerURL();
-var expectedReferer = "cloud.connected.depaul.edu";
+var expectedReferer = "somewebsite.com";
 //var post = Platform.Request.GetPostData();
 //var postObj = Platform.Function.ParseJSON(post);
 var deName = Platform.Request.GetQueryStringParameter("deName");
 var uploaderID = Platform.Request.GetQueryStringParameter("uploaderID");
 var mid = Platform.Request.GetQueryStringParameter("businessUnit");
 var createDE = Platform.Request.GetQueryStringParameter("createDe");
-var response = {};
+//Get standard fields sent from page. This is an integer, a count of standard headers from main landing
+//We multiply by 1 to make sure it's a number. It was coming over as a string sometimes causing the if statement on line 76 to fail
+var standardFields = Platform.Request.GetQueryStringParameter("standardFields")*1;
 
+var headers = Platform.Request.GetQueryStringParameter("headers");//The actual full list of headers found in the CSV file
+var response = {};
+    var dataExtensions = {
+        tokenstorage: "tokenstorage_donot_delete"
+    }
 switch(mid){
-    case "531600": var categoryId = 3776; break;//Admin BU
-    case "534128": var categoryId = 3797; break;//Advanced BU
-    case "534127": var categoryId = 3748; break;//Standard BU
-    case "539126": var categoryId = 3782; break;//Office of Sec BU
-    default: var categoryId = 3195;
+    case "123": var categoryId = 123; break;//Admin BU
+    case "123": var categoryId = 123; break;//Advanced BU
+    case "123": var categoryId = 123; break;//Standard BU
+    case "123": var categoryId = 123; break;//Office of Sec BU
+    default: var categoryId = 123;
 }
 
 var config = {
         mc:{
-            subdomain:"xxxxx",
+            subdomain:"xxxxxx",
             clientid:"xxxxx",
-            clientsecret:"xxxxx",
+            clientsecret:"xxxxxx",
             mid:mid
         }
     };
 
 
-var token = authMC(config.mc.subdomain,config.mc.mid,config.mc.clientid,config.mc.clientsecret);
+//var token = authMC(config.mc.subdomain,config.mc.mid,config.mc.clientid,config.mc.clientsecret);
+var token = checkForStoredToken("Marketing Cloud",mid);
 
 var endpoint = 'https://'+config.mc.subdomain+'.rest.marketingcloudapis.com/data/v1/customobjects';
 
 var retentionProps = {};
     retentionProps.isDeleteAtEndOfRetentionPeriod = true;
-    retentionProps.isRowBasedRetention = true;
+    retentionProps.isRowBasedRetention = false;
     retentionProps.isResetRetentionPeriodOnImport = false;
+    retentionProps.dataRetentionPeriodLength = 120;
+    retentionProps.dataRetentionPeriodUnitOfMeasure = 3;
 
 var de = {};
     de.name = deName;
@@ -64,6 +71,16 @@ var de = {};
         fieldObj("FirstName","Text",100,4,false,true),
         fieldObj("LastName","Text",100,5,false,true)
         ];
+    
+var headerSet = headers.split('|');
+if(headerSet.length > standardFields){
+    for(var h = standardFields; h < headerSet.length; h++){
+        loopCounter++;
+        var ordinal = h*1+2;//when we created the fields above, we left off at 5, h will be 4 at start of loop, so we add 2 to get 6 
+        de.fields.push(fieldObj(headerSet[h],"Text",255,ordinal,false,true));
+    }
+}
+
 
 try{   
 
@@ -71,11 +88,13 @@ try{
         var request = scriptUtilRequest(endpoint,"POST","Authorization", "Bearer "+token,Stringify(de));
         var resp = Platform.Function.ParseJSON(request.content + "");
         if(resp.id){
-            response.message = "Data extension was created";
+            response.message = "Data extension was created.";
+            response.headerSetLength = headerSet.length;
             response.deNAME = deName;
+            response.standardFields = standardFields;
             response.deID = resp.id;
             response.type = "Success";
-            Write(Stringify(response))
+            Write(Stringify(response));
         }    
     }
 
@@ -151,6 +170,86 @@ try{
         Write(message)
     }
     
+}
+function checkForStoredToken(system,account_id){
+    var prox = new Script.Util.WSProxy(); 
+    var rightNow = new Date();
+    var expiry = new Date();
+        if(system == "Marketing Cloud"){
+            expiry = expiry.setMinutes(expiry.getMinutes()-19);
+        }else{
+            expiry = expiry.setHours(expiry.getHours()-24);
+        }
+        
+
+    var cols = ["token"];
+    var leftFilter = {
+        Property: "expiration",
+        SimpleOperator: "greaterThan",
+        Value: expiry
+    };
+
+    var rightFilter = {
+        Property: "system",
+        SimpleOperator: "equals",
+        Value: system
+    };
+
+    var complexFilter = {
+        LeftOperand: leftFilter,
+        LogicalOperator:"AND",
+        RightOperand: rightFilter
+    }
+    //adding this so we can also lookup by mid
+    var tripleFilter = {
+        LeftOperand: complexFilter,
+        LogicalOperator:"AND",
+        RightOperand: {
+          Property: "mid",
+          SimpleOperator: "equals",
+          Value: account_id
+        }
+    }    
+
+    var data = prox.retrieve("DataExtensionObject["+dataExtensions.tokenstorage+"]",cols,tripleFilter);
+    var existingToken = data.Results[0].Properties[0].Value;
+
+    if(existingToken == null){
+
+        switch(system){
+            case "Marketing Cloud":var token = authMC(config.mc.subdomain,config.mc.mid,config.mc.clientid,config.mc.clientsecret);break;
+            default:Write("something went wrong");
+        }
+ 
+        var props = [
+            {
+                "Name": "token",
+                "Value": token
+            },
+            {
+                "Name": "expiration",
+                "Value": new Date()
+            },
+            {
+                "Name": "system",
+                "Value": system
+            },
+            {
+                "Name": "mid",
+                "Value": account_id
+            }               
+        ];
+        var options = {SaveOptions: [{'PropertyName': '*', SaveAction: 'UpdateAdd'}]};  
+        var result = prox.updateItem('DataExtensionObject', {
+            CustomerKey: dataExtensions.tokenstorage,
+            Properties: props
+        },options); 
+     
+        return token; 
+    }else{
+        return existingToken
+    }
+
 }
 
 //Sample errors
