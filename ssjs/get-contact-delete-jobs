@@ -1,0 +1,247 @@
+<script runat="server">
+Platform.Load("Core","1");
+
+    var config = {
+        mc:{
+            subdomain:"xxxxxx",
+            clientid:"xxxxx",
+            clientsecret:"xxxxxx",
+            mid:123456789
+        }
+    };
+    var dataExtensions = {
+        tokenstorage: "tokenstorage"
+    }
+
+    var restUrl = 'https://'+config.mc.subdomain+'.rest.marketingcloudapis.com/';
+    var properties = ['numberOfDaysRestorable','operationID','eID','mID','employeeID','operationRequestID','status','scheduledTime','startTime','endTime','listTypeID','listIdentifier','listKey','listName','expectedListCount','actualListCount','deleteType','contextType','createdDate','createdBy','operationName','restorableUntilDate','backgroundOperationID','backgroundOperationStartDate','backgroundOperationCompletedDate','backgroundOperationStatus','priority','suppressionType'];
+
+
+    try{
+
+        var accessToken = checkForStoredToken("Marketing Cloud");//ensure your DE exists before you use this and set name and Key to tokenstorage
+
+        var deleteJobs = getDeleteJobsAll(); 
+
+        var fields = [];
+        for(var i in deleteJobs){
+
+            fields.push({
+                CustomerKey: 'Contact_Delete_Requests',
+                Properties: makeFieldArray(properties,deleteJobs[i])
+            });
+
+        }
+
+        var prox = new Script.Util.WSProxy();   
+        var options = {SaveOptions: [{'PropertyName': '*', SaveAction: 'UpdateAdd'}]};
+        var addErrorRecords = prox.updateBatch('DataExtensionObject', fields, options);
+
+    }catch(e){
+      
+       Write(Stringify(e));
+       Write(Stringify('\r\n'));
+
+    }
+
+
+function makeFieldArray(props,arrItem){
+    var array = [];
+    for(var prop in props){
+        var obj = {};
+        obj.Name = props[prop]
+        obj.Value = arrItem[props[prop]];
+
+        array.push(obj);
+    }
+
+    return array;
+   
+}
+function getDeleteJobsAll(){
+    var page = 1;
+    var pageSize = 50;
+    var output = [];
+    var endpoint = 'contacts/v1/contacts/deleteOperations?$page='+page+'&$pageSize='+pageSize;
+    var url = restUrl+endpoint;
+    var request = scriptUtilRequest(url,"GET","Authorization", "Bearer "+accessToken);
+    var resp = Platform.Function.ParseJSON(request.content + "");
+
+    if(resp.count == 0) return [];
+
+    output = resp.items;
+    
+    if(resp.count > pageSize){
+        
+        var loops = resp.count / pageSize;     
+
+        for(var i = 1; i < loops; i++){
+            var nextPage = i + 1;
+
+            var nextURL = restUrl+'contacts/v1/contacts/deleteOperations?$page='+nextPage+'&$pageSize='+pageSize;
+            var request = scriptUtilRequest(nextURL,"GET","Authorization", "Bearer "+accessToken);
+            var resp = Platform.Function.ParseJSON(request.content + "");            
+            var items = resp.items;
+
+            for(var k in items){
+                var item = items[k];
+                output.push(item);
+            }
+        }
+
+   
+    }
+
+    return output;
+    //return resp;
+
+}
+function getDeleteJobsByDate(){
+        var endpoint = 'contacts/v1/contacts/analytics/deleterequests?';//startdateutc=2025-05-29T00:00:00Z&enddateutc=2025-06-10T00:00:00Z
+
+        var url = restUrl+endpoint;
+        var enddate =  getIsoTime();
+        var startdate = getIsoTime("-13","D");//MI,Y,M,D,H
+            url += 'startdateutc='+startdate;
+            url += '&enddateutc='+enddate;
+            url += '&$pageSize=200';
+            url += '&$page=1';
+        var request = scriptUtilRequest(url,"GET","Authorization", "Bearer "+accessToken);
+        var resp = Platform.Function.ParseJSON(request.content + "");
+        return resp.operations;    
+}
+function Write(str) {
+   Platform.Response.Write(str);
+}
+function Stringify(obj) {
+   return Platform.Function.Stringify(obj);
+}
+function getIsoTime(offset,units){
+
+    try{
+    var amp = '\%\%[ ';
+
+        if(offset){
+            amp += 'set @date = DateAdd(Now(),"'+offset+'","'+units+'") '
+        }else{
+            amp += 'set @date = Now() '
+        }
+        
+        amp += 'set @d = FormatDate(@date,"iso") '
+        amp += 'output(v(@d)) ';
+        amp += ']\%\%';
+        return Platform.Function.TreatAsContent(amp);
+    } catch (e2) {
+        return Stringify(e2);
+    }      
+}
+function scriptUtilRequest(url,method,headerName,headerValue,postData){
+        var req = new Script.Util.HttpRequest(url);
+
+        req.emptyContentHandling = 0;
+        req.retries = 2;
+        req.continueOnError = false;
+        req.contentType = "application/json"
+        req.setHeader(headerName,headerValue);
+        req.method = method;
+        req.encoding = "UTF-8";
+        if(postData){
+            req.postData = postData;
+        }
+
+    try{
+        var resp = req.send();
+        return resp;
+
+        }catch(e){
+            var message = "Failed at Authentication: "+e.message;
+            Write(message);
+        }
+        
+}
+function checkForStoredToken(system){
+    var prox = new Script.Util.WSProxy();   
+	var rightNow = new Date();
+	var expiry = new Date();
+        if(system == "Marketing Cloud"){
+            expiry = expiry.setMinutes(expiry.getMinutes()-19);
+        }else{
+            expiry = expiry.setHours(expiry.getHours()-24);
+        }
+		
+	var cols = ["token"];
+	var leftFilter = {
+		Property: "expiration",
+		SimpleOperator: "greaterThan",
+		Value: expiry
+	};
+
+	var rightFilter = {
+		Property: "system",
+		SimpleOperator: "equals",
+		Value: system
+	};
+
+	var complexFilter = {
+		LeftOperand: leftFilter,
+		LogicalOperator:"AND",
+		RightOperand: rightFilter
+	}
+
+	var data = prox.retrieve("DataExtensionObject["+dataExtensions.tokenstorage+"]",cols,complexFilter);
+	var existingToken = data.Results[0].Properties[0].Value;
+	if(existingToken == null){
+
+		switch(system){
+			case "Marketing Cloud":var token = authMC(config.mc.subdomain,config.mc.mid,config.mc.clientid,config.mc.clientsecret);break;
+			case "Beamery":var token = authBeamery2(config.beamery.baseURL);break;
+			default:Write("something went wrong");
+		}
+		var props = [
+			{
+				"Name": "token",
+				"Value": token
+			},
+			{
+				"Name": "expiration",
+				"Value": new Date()
+			},
+			{
+				"Name": "system",
+				"Value": system
+			}
+		];
+
+	        var options = {SaveOptions: [{'PropertyName': '*', SaveAction: 'UpdateAdd'}]};  
+	        var result = prox.updateItem('DataExtensionObject', {
+	            CustomerKey: dataExtensions.tokenstorage,
+	            Properties: props
+	        },options);	
+
+		return token;	
+	}else{
+		return existingToken
+	}
+
+}
+function authMC(subdomain,accountid,clientid,clientsecret){
+
+    var baseURI = 'https://'+subdomain+'.auth.marketingcloudapis.com/';
+    var endpoint = 'v2/token';
+    var url = baseURI+endpoint;
+    var grant = 'client_credentials';
+    var contentType = 'application/json';
+    var payload = '{"grant_type":"'+grant+'","client_id":"'+clientid+'","client_secret":"'+clientsecret+'","account_id":"'+accountid+'"}';
+    try {
+
+        var request = scriptUtilRequest(url,"POST","Accept", "application/json",payload);
+        var resp = Platform.Function.ParseJSON(request.content + "");
+    	return resp.access_token; 
+    
+     } catch (e) {
+        Write("<br>e: " + Stringify(e));
+     }
+}
+
+//https://{{subdomain}}.rest.marketingcloudapis.com/contacts/v1/contacts/analytics/deleterequests?startdateutc=2025-05-29T00:00:00Z&enddateutc=2025-06-10T00:00:00Z
+</script>
