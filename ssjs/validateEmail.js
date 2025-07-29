@@ -77,7 +77,7 @@ function validateEmail(emailaddr){
         'ListDetectiveValidator'
         ]
     }
-    var restApi = new Script.Util.RestProxy('1btsih0ax64q0x13wcl777fl', 'UHLMA2rB699BqcOnv0pz9gMU');//clientid and secret of installed package
+    var restApi = new Script.Util.RestProxy('xxxxx', 'xxxxx');//clientid and secret of installed package
     var resp = restApi.Post('/address/v1/validateEmail', payload);
 
    
