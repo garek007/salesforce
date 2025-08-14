@@ -1,3 +1,4 @@
+/*REF: https://salesforce.stackexchange.com/questions/405830/get-a-list-of-all-activities*/
 SELECT 
     j.journeyname
 ,   ja.activityname  AS EmailName
