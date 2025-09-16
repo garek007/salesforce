@@ -223,11 +223,6 @@ function dataExtract(startDay, endDay, year, month) {
 
 
 
-function parameter(name,value){
-    return '<Parameter><Name>'+name+'</Name><Value>'+value+'</Value></Parameter>'
-}
-
-
 function scriptUtilRequest(url,method,headerName,headerValue,postData,contentType){
     var req = new Script.Util.HttpRequest(url);
 
