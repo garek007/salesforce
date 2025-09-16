@@ -1,8 +1,8 @@
 <script runat="server">
 
     Platform.Load("Core","1");
-    var token = "eyJhbGciOiJIUzI1NiIsImtpZCI6IjQiLCJ2ZXIiOiIxIiwidHlwIjoiSldUIn0.eyJhY2Nlc3NfdG9rZW4iOiI2b2Z5ZndqRUNkTVNCZ1NHZTEzOHBvRHYiLCJjbGllbnRfaWQiOiJrZGgwMWg3aXhsa21uOTVqZG1reHE2bGMiLCJlaWQiOjUyMDAwMTAzNCwic3RhY2tfa2V5IjoiUzYiLCJwbGF0Zm9ybV92ZXJzaW9uIjoyLCJjbGllbnRfdHlwZSI6IlNlcnZlclRvU2VydmVyIiwicGlkIjoyNjR9.dR92mNDzE27I2sE7nBS1NfhdXtMCc7YSqQrxZVjuWCU.YfVNKhwhWHmwMbIL1sQxeOqbrd14hNjRKULW4bQgP9DQM1uD3WO4uioGPggkeYaNAro4D4YyB90cewDaS3bEj_LiOqJorpqG4vKzcUXQrbC7SN_66DBJnix9Z2Fi3W-0Qa4WQT7kJFQfsSyTfpWXTM5QHgKWyqfCmZt260Y";
-    var subdomain = 'mcffhzgppqw1sdnkwwqqhv6q4f-m';
+    var token = "[ACCESSTOKEN]";
+    var subdomain = 'YOURSUBDOMAIN';
     var span = 1;//29 is the max
     var startDate = new Date("01/01/2021");
         startDate.setHours(0);
@@ -24,34 +24,6 @@
     Write("-----------")
     Write(endDate);
 
-    var soapAction = 'Retrieve';
-    var soapStart = '<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">';
-        soapStart+= '<s:Header><a:Action s:mustUnderstand="1">'+soapAction+'</a:Action><a:To s:mustUnderstand="1">https://'+subdomain+'.soap.marketingcloudapis.com/Service.asmx</a:To>';
-        soapStart+= '<fueloauth>'+token+'</fueloauth></s:Header><s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">';
-        soapStart+= '<ExtractRequestMsg xmlns="http://exacttarget.com/wsdl/partnerAPI"><Requests><ID>c7219016-a7f0-4c72-8657-1ec12c28a0db</ID><Parameters>';
-        soapStart+= parameter("OutputFileName",'testdates333.zip');
-        soapStart+= parameter("StartDate",startDateSt);
-        soapStart+= parameter("EndDate",endDate);
-        soapStart+= parameter("UnicodeOutput","true");
-        soapStart+= parameter("Format","csv");
-        soapStart+= parameter("QuoteText","true");
-        soapStart+= parameter("ExtractBounces","true");
-
-
-        //soapStart+= '<Parameter><Name>StartDate</Name><Value>'+startDateSt+'</Value></Parameter>';
-        //soapStart+= '<Parameter><Name>EndDate</Name><Value>'+endDate+'</Value></Parameter>';
-        //soapStart+= '<Parameter><Name>ExtractBounces</Name><Value>true</Value></Parameter>';
-
-        soapStart+= '</Parameters></Requests></ExtractRequestMsg></s:Body></s:Envelope>';    
-    
-
-    //var startDate =  getIsoTime();
-    //var endDate = getIsoTime("-1","D");  
-
-
-
-
-
 
 
 
@@ -67,10 +39,6 @@
 
 
 
-
-
-
-  
      
      try {
 
@@ -146,9 +114,162 @@ function getIsoTime(offset,units){
     }      
 }
 
+//NEW CODE DOWN HERE AND INSTEAD OF A LOOP, IT GETS DATES FROM THE PREVIOUS MONTH, EVEN IF IT'S A 31 DAY MONTH
+============================
+    ==============================
+    ===========================
 
 
 
+
+
+    
+  
+  var today = new Date();
+  
+  // Step 1: get the previous month
+  // Setting day=0 gives us the "last day of the previous month"
+  var lastDayPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+  
+  var prevMonthDays = lastDayPrevMonth.getDate();
+  var prevMonth = lastDayPrevMonth.getMonth() + 1; // 1-based month
+  var prevYear = lastDayPrevMonth.getFullYear();
+
+
+
+  if (prevMonthDays === 30) {
+    // Normal call
+    Output("Running single call for days 1–30...");
+    dataExtract(1, 30, prevYear, prevMonth);
+  } else if (prevMonthDays === 31) {
+    // Split into two calls
+    Output("Splitting into two calls: days 1–30 and day 31...");
+    dataExtract(1, 30, prevYear, prevMonth);
+    dataExtract(31, 31, prevYear, prevMonth);
+  } else if (prevMonthDays === 28 || prevMonthDays === 29) {
+    // February case (for completeness)
+  
+    dataExtract(1, prevMonthDays, prevYear, prevMonth);
+  }  
+
+var token = 'whatevs';
+  
+function dataExtract(startDay, endDay, year, month) {
+
+    var startDateTime = month+'/'+startDay+'/'+year+' 12:00:00 AM';
+    var endDateTime = month+'/'+endDay+'/'+year+' 11:59:59 PM';
+    var soapAction = 'Retrieve';
+    var soapEnv = '<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">';
+        soapEnv+= '<s:Header><a:Action s:mustUnderstand="1">'+soapAction+'</a:Action><a:To s:mustUnderstand="1">https://'+subdomain+'.soap.marketingcloudapis.com/Service.asmx</a:To>';
+        soapEnv+= '<fueloauth>'+token+'</fueloauth></s:Header><s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">';
+        soapEnv+= '<ExtractRequestMsg xmlns="http://exacttarget.com/wsdl/partnerAPI"><Requests><ID>c7219016-a7f0-4c72-8657-1ec12c28a0db</ID><Parameters>';
+        soapEnv+= parameter("OutputFileName",'testdates333.zip');
+        soapEnv+= parameter("StartDate",startDateTime);
+        soapEnv+= parameter("EndDate",endDateTime);
+        soapEnv+= parameter("Format","csv");
+        //soapEnv+= parameter("QuoteText","false");
+        soapEnv+= parameter("ColumnDelimiter",",");
+        //soapEnv+= parameter("UnicodeOutput","false");
+        soapEnv+= parameter("NotificationEmail","stan.alachniewicz@labcorp.com");
+        //soapEnv+= parameter("Timezone","79");
+        //soapEnv+= parameter("UseLocalTZinQuerypublic","false");
+        //soapEnv+= parameter("IncludeMilliseconds","false");
+        //soapEnv+= parameter("ExtractSubscribers","false");
+        //soapEnv+= parameter("IncludeAllSubscribers","false");
+        //soapEnv+= parameter("ExtractAttributes","false");
+        //soapEnv+= parameter("extractStatusChanges","false");
+        //soapEnv+= parameter("IncludeGEO","false");
+        //soapEnv+= parameter("IncludeUserAgentInformation","false");
+        
+        //soapEnv+= parameter("ExtractSent","true");
+        //soapEnv+= parameter("ExtractNotSent","true");
+        //soapEnv+= parameter("ExtractSendData","true");
+        //soapEnv+= parameter("ExtractSendImpressions","true");
+        //soapEnv+= parameter("IncludeTestSends","true");
+        soapEnv+= parameter("ExtractSendJobs","true");
+        //soapEnv+= parameter("ExtractOpens","true");
+        //soapEnv+= parameter("IncludeUniqueOpens","true");
+        //soapEnv+= parameter("IncludeInferredOpens","true");
+        soapEnv+= parameter("ExtractClicks","true");
+        //soapEnv+= parameter("ExtractClickImpressions","true");
+        //soapEnv+= parameter("IncludeUniqueClicks","true");
+        //soapEnv+= parameter("IncludeUniqueForURLClicks","true");
+        soapEnv+= parameter("ExtractBounces","true");
+        soapEnv+= parameter("ExtractUnsubs","true");
+        soapEnv+= parameter("IncludeUnsubReason","true");
+
+        //soapEnv+= parameter("ExtractSpamComplaints","true");
+        //soapEnv+= parameter("extractListMembershipChanges","true");
+        //soapEnv+= parameter("extractLists","true");
+        //soapEnv+= parameter("IncludeAllListMembers","true");
+        //soapEnv+= parameter("ExtractMultipleDataExtensionListData","true");
+        //soapEnv+= parameter("ExtractConversions","true");
+        //soapEnv+= parameter("ExtractSurveyResponses","true");
+        //soapEnv+= parameter("IncludeCampaignID","true");
+        soapEnv+= parameter("CharacterEncoding","UTF-8");
+        soapEnv+='</Requests>';
+        soapEnv+='</ExtractRequestMsg>';
+        soapEnv+='</s:Body>';
+        soapEnv+='</s:Envelope>';
+
+  return soapEnv;
+
+
+}  
+
+
+
+
+
+
+
+function parameter(name,value){
+    return '<Parameter><Name>'+name+'</Name><Value>'+value+'</Value></Parameter>'
+}
+
+
+function scriptUtilRequest(url,method,headerName,headerValue,postData,contentType){
+    var req = new Script.Util.HttpRequest(url);
+
+    req.emptyContentHandling = 0;
+    req.retries = 2;
+    req.continueOnError = false;
+    req.contentType = contentType || 'application/json';
+    req.setHeader(headerName,headerValue);
+    req.method = method;
+    req.encoding = "UTF-8";
+    if(postData){
+        req.postData = postData;
+    }
+
+try{
+    var resp = req.send();
+    return resp;
+
+    }catch(e){
+        //res.errors.push({ErrorMsg:e.message,ErrorDescription:e.description,IP_Address:Platform.Request.ClientIP});
+        var message = "Failed at Authentication: "+e.message;
+        Output(message);
+        Output("\r\n");
+        Output(e.description);
+        //logFailed({ErrorMsg:message,ErrorDescription:e.description},"not_applicable");
+    }
+    
+}
+
+
+
+  
+function Output(str,linebreaks) {
+    Platform.Response.Write(str);
+    linebreaks = linebreaks || 1;
+    for(var line in linebreaks){
+        Platform.Response.Write("\r\n");
+    }
+ }
+function Stringify(obj) {
+    return Platform.Function.Stringify(obj);
+}  
 
 
 
