@@ -1,0 +1,267 @@
+<script runat="server">
+/**
+* CHANGELOG
+* 2025-12-22: Delivered script to Chad
+*/  
+  function Output(str,linebreaks) {
+    Platform.Response.Write(str);
+    linebreaks = linebreaks || 1;
+    for(var line in linebreaks){
+        Platform.Response.Write("\r\n");
+    }
+  }
+  function Stringify(obj) {
+    return Platform.Function.Stringify(obj);
+  }
+
+  var de2clone = Platform.Request.GetQueryStringParameter("de2clone");  
+  if(Platform.Request.Method == 'POST'){//form was posted
+    var payload = Platform.Request.GetPostData();
+    var prox = new Script.Util.WSProxy();
+    //var payload = '{"Name":"sdfsdfds2a","CustomerKey":"sdfsdfds2a","CategoryID":"18166","Fields":[{"Name":"testttt","FieldType":"Text","IsPrimaryKey":false,"IsRequired":false,"MaxLength":50},{"Name":"test","FieldType":"Text","IsPrimaryKey":"true","IsRequired":"true","MaxLength":50}],"IsSendable":true,"IsTestable":false,"SendableDataExtensionField":{"Name":"test","FieldType":"Text"},"SendableSubscriberField":{"Name":"Subscriber Key"}}';
+    try{
+      var deCreateResult = prox.createItem('DataExtension',Platform.Function.ParseJSON(payload));
+      Output(Stringify(deCreateResult));
+    }catch(e){
+      Output(e.message);
+      Output(e.description);
+    }
+  }else if(de2clone == null || de2clone == undefined || de2clone == ''){
+  </script>
+  <form method="get" action="">
+    <label>Enter Customer Key of data extension to clone
+      <input type="text" id="de2clone" name="de2clone" placeholder="Enter Customer Key">
+    </label>
+    <button type="submit">Submit</button>
+  </form>
+  <script runat="server">
+  }else{
+    var tabledata = '';
+    var headers = '';
+    
+    try{
+      var prox = new Script.Util.WSProxy();
+      var cols = ['Name','MaxLength','IsRequired','FieldType','DefaultValue','Ordinal'];
+    
+      var filterfields = {
+          Property: "DataExtension.CustomerKey",
+          SimpleOperator: "equals",
+          Value: de2clone // Replace with your DE's CustomerKey
+      };  
+      // Perform the retrieve operation
+      var fields = prox.retrieve("DataExtensionField", cols, filterfields); 
+    
+      if (fields.Results && fields.Results.length > 0) {
+    
+          var tableHeaders = [];
+          var tableRows = [];
+    
+          for(var j = 0; j < fields.Results.length; j++){
+              var rowObj = {};
+                  rowObj.Name = fields.Results[j]['Name'];
+                  rowObj.FieldType = fields.Results[j]['FieldType'];
+                  rowObj.IsPrimaryKey = false;
+                  rowObj.IsRequired = false;
+                  if(fields.Results[j]['FieldType'] == 'Text' || fields.Results[j]['FieldType'] == 'Phone'){
+                  rowObj.MaxLength = fields.Results[j]['MaxLength'];
+              }
+
+
+              tableRows.push(rowObj);
+          }
+          //this code is not very sophisticated, because of the way we are only adding MaxLength on line 57
+          //if the field is text or phone field, it may not be in the first [0]
+          //row of tableRows and if not, we need to run the code below to double check and add it.
+          for (var key in tableRows[0]) {
+            if (tableRows[0].hasOwnProperty(key)) {
+              var headerObj = {};
+                  headerObj.title = key;
+                  headerObj.field = key;
+                  headerObj.editor = "input";
+              tableHeaders.push(headerObj);
+            }
+          }
+
+          var maxLengthExists = false;
+          for (var i = 0; i < tableHeaders.length; i++) {
+            if (tableHeaders[i].title === "MaxLength") {
+              maxLengthExists = true;
+              break;
+            }
+          }
+          if (!maxLengthExists) {
+            tableHeaders.push({
+              title: "MaxLength",
+              field: "MaxLength",
+              editor: "input"
+            });
+          }
+
+    
+          tabledata = Stringify(tableRows);
+          headers = Stringify(tableHeaders);
+      }
+    
+      }catch(e){
+        //Output('second message');
+        Output(Stringify(e));
+        //Output("\r\n");
+      }
+    
+      </script>
+
+
+
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Clone DE</title>
+          <link href="https://unpkg.com/tabulator-tables@6.3/dist/css/tabulator.min.css" rel="stylesheet">
+          <script src="https://unpkg.com/tabulator-tables@6.3/dist/js/tabulator.min.js"></script>
+      
+      </head>
+      <body>
+          <label>Data Extension Name
+              <input type="input" name="dename" id="dename" > 
+          </label>
+          <label>Category (Folder) ID
+              <input type="input" name="categoryid" id="categoryid" > 
+          </label>     
+          <label>
+              <input type="checkbox" name="sendable" id="sendable" value="true"> Sendable
+          </label>
+          <label>
+              <input type="checkbox" name="testable" id="testable" value="true"> Testable
+          </label>
+          <label>Sendable Field 
+              <input type="input" name="sendablekey" id="sendablekey" > 
+          </label>    
+          <div id="my-table"></div>
+      
+          <button id="createDE" style="padding:15px;margin:10px;">Create DE</button>
+          <script>
+              var tabledata = <ctrl:var name="tabledata" />;
+              
+              var table = new Tabulator("#my-table", {
+                data:tabledata,
+                layout:"fitColumns",
+                movableRows:true,                    // enables row drag & drop
+                columns:<ctrl:var name="headers" />,
+              });
+              document.getElementById('createDE').addEventListener('click',function(e){
+                  // Field validation before sending the payload
+
+
+                  var data = table.getData();
+                  console.log(data);
+      
+                  var deName = document.getElementById('dename').value;
+                  var folderID = document.getElementById('categoryid').value;
+                                    
+                  if (!deName || !folderID) {
+                    alert("Please fill out both the Data Extension Name and Category (Folder) ID fields.");
+                    return;
+                  }
+                  var isSendable = document.getElementById('sendable').checked;
+                  var dePayload = {
+                      Name: deName,
+                      CustomerKey: deName,
+                      CategoryID: folderID,
+                      Fields: [],
+                      IsSendable: isSendable,
+                      IsTestable: document.getElementById('testable').checked
+                    };
+
+                    
+                    if(isSendable == true){
+                      var sendableField = document.getElementById('sendablekey').value;
+                      if(sendableField == '' || sendableField == undefined || sendableField == null){
+                        alert("You checked Sendable, but did not add a Sendable Field");
+                        return;
+                      }
+                      dePayload.SendableDataExtensionField = {
+                        "Name": sendableField,
+                        "FieldType":"Text"                        
+                      }
+                      dePayload.SendableSubscriberField = {
+                        "Name": "Subscriber Key"
+                      }
+                    }
+      
+                    for (var i = 0; i < data.length; i++) {
+                      var field = data[i];
+                      if(field.IsPrimaryKey == true){//safeguard in case someone forgets to make field required if they make it a primary key
+                        field.IsRequired = true;
+                      }
+                      dePayload.Fields.push(field);
+                    }
+                    
+                  //console.log(data);
+                  console.log(JSON.stringify(dePayload));
+      
+                  (async () => {
+                      let sendit = await postData('',dePayload);
+                      console.log(sendit);
+                  })();            
+              });
+
+              async function postData(url = "", data = {}) {
+                  // Default options are marked with *
+                  const response = await fetch(url, {
+                    method: "POST", // *GET, POST, PUT, DELETE, etc.
+                    mode: "cors", // no-cors, *cors, same-origin
+                    cache: "force-cache", // *default, no-cache, reload, force-cache, only-if-cached
+                    credentials: "same-origin", // include, *same-origin, omit
+                    headers: {
+                      "Content-Type": "application/json",
+                      'Authorization': 'OAuth ',
+                      // 'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    redirect: "follow", // manual, *follow, error
+                    referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                    body: JSON.stringify(data), // body data type must match "Content-Type" header
+                  });
+                  return response.json(); // parses JSON response into native JavaScript objects
+                }        
+              
+      
+              
+      
+              </script>      
+      </body>
+      
+      </html>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <script runat="server">
+  }
+</script>
+
+
+
+
+
+
+
+	
+
