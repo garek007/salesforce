@@ -47,11 +47,61 @@ try {
 
     var deCols = ["CustomerKey", "Name", "CategoryID"];
     var filterAll = { Property: "CustomerKey", SimpleOperator: "isNotNull", Value: "" };
-    var deResults = api.retrieve("DataExtension", deCols, filterAll);
+    var outputCSV = false
+    var result = [],
+        objs = [],
+        moreData = true,
+        maxLoops = 10,
+        reqID = request = null;
+    var targetDE = 'All_data_extensions';//CustomerKey for saving DE names to a DE
 
-    if (deResults && deResults.Results) {
-        for (var i = 0; i < deResults.Results.length; i++) {
-            var de = deResults.Results[i];
+    while(moreData == true && maxLoops > 0) {
+
+        moreData = false;
+        if(reqID) config.props.ContinueRequest = reqID;
+
+        var request = api.retrieve('DataExtension', deCols, filterAll);
+
+        if(request) {
+
+            moreData = request.HasMoreRows;
+            reqID = request.RequestID;
+
+            for (var i = 0; i < request.Results.length; i++) {
+                result.push(request.Results[i]);
+
+                objs.push({
+                    CustomerKey: targetDE,
+                    Keys: [
+                        {
+                            Name:'Name',
+                            Value:request.Results[i].CustomerKey
+                        },
+                        {
+                            Name:'CustomerKey',
+                            Value:request.Results[i].Name
+                        }
+                    ]
+                });                  
+            }
+
+        }
+        maxLoops--;
+
+    }
+    Write(Stringify(result));
+
+
+
+
+    var deleteem = api.createBatch('DataExtensionObject', objs);
+
+    //var deResults = api.retrieve("DataExtension", deCols, filterAll);
+    
+
+    if (false) {//result
+        for (var i = 0; i < result.length; i++) {
+            var de = result[i];
 
             var deCustomerKey = de.CustomerKey;
             var deName = de.Name;
@@ -67,7 +117,7 @@ try {
                 RightOperand: {
                     Property: "Name",
                     SimpleOperator: "equals",
-                    Value: "Appt_Date_Time"
+                    Value: "DateAdded"
                 }
             };
 
@@ -91,21 +141,24 @@ try {
         }
     }
 
-    // ---- Create CSV ----
-    var csv = "Name,CustomerKey,FolderPath\r\n";
-    for (var j = 0; j < deWithField.length; j++) {
-        csv += [
-            csvEscape(deWithField[j].Name),
-            csvEscape(deWithField[j].CustomerKey),
-            csvEscape(deWithField[j].Path)
-        ].join(",") + "\r\n";
+    if(outputCSV){
+        // ---- Create CSV ----
+        var csv = "Name,CustomerKey,FolderPath\r\n";
+        for (var j = 0; j < deWithField.length; j++) {
+            csv += [
+                csvEscape(deWithField[j].Name),
+                csvEscape(deWithField[j].CustomerKey),
+                csvEscape(deWithField[j].Path)
+            ].join(",") + "\r\n";
+        }
+
+        // ---- Output CSV ----
+        Platform.Response.SetResponseHeader("Content-Type", "text/csv");
+        Platform.Response.SetResponseHeader("Content-Disposition", "attachment; filename=DEs_With_Field.csv");
+
+        Write(csv);
     }
 
-    // ---- Output CSV ----
-    Platform.Response.SetResponseHeader("Content-Type", "text/csv");
-    Platform.Response.SetResponseHeader("Content-Disposition", "attachment; filename=DEs_With_Field.csv");
-
-    Write(csv);
 
 } catch (e) {
     Write(Stringify(e));
