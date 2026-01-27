@@ -175,7 +175,7 @@ try {
 
         // ---- Output CSV ----
         Platform.Response.SetResponseHeader("Content-Type", "text/csv");
-        Platform.Response.SetResponseHeader("Content-Disposition", "attachment; filename=DEs_With_Field.csv");
+        Platform.Response.SetResponseHeader("Content-Disposition", "attachment; filename="+fieldToFind+".csv");
 
         Write(csv);
     }
