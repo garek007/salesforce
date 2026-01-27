@@ -45,22 +45,39 @@ function csvEscape(str) {
 
 try {
 
-    var deCols = ["CustomerKey", "Name", "CategoryID"];
-    var filterAll = { Property: "CustomerKey", SimpleOperator: "isNotNull", Value: "" };
-    var outputCSV = false
+    var fieldToFind = Request.GetQueryStringParameter('field');
+    var outputCSV = true;
+    var upsertToDE = false;
     var result = [],
         objs = [],
         moreData = true,
-        maxLoops = 10,
+        maxLoops = 2,
         reqID = request = null;
     var targetDE = 'All_data_extensions';//CustomerKey for saving DE names to a DE
+
+    var c = {
+        object: 'DataExtension',
+        cols: ['CustomerKey','Name','CategoryID'],
+        filter:{ Property: "CustomerKey", SimpleOperator: "isNotNull", Value: "" },
+        opts: {
+            BatchSize: 2500
+        },
+        props: {
+            QueryAllAccounts: false
+        }
+    };
+
 
     while(moreData == true && maxLoops > 0) {
 
         moreData = false;
-        if(reqID) config.props.ContinueRequest = reqID;
 
-        var request = api.retrieve('DataExtension', deCols, filterAll);
+        if(reqID == null){
+            request = api.retrieve(c.object, c.cols, c.filter,c.opts,c.props);
+        }else{
+            request = api.getNextBatch(c.object, reqID);
+        }
+
 
         if(request) {
 
@@ -72,14 +89,14 @@ try {
 
                 objs.push({
                     CustomerKey: targetDE,
-                    Keys: [
+                    Properties: [
                         {
                             Name:'Name',
-                            Value:request.Results[i].CustomerKey
+                            Value:request.Results[i].Name
                         },
                         {
                             Name:'CustomerKey',
-                            Value:request.Results[i].Name
+                            Value:request.Results[i].CustomerKey
                         }
                     ]
                 });                  
@@ -89,17 +106,21 @@ try {
         maxLoops--;
 
     }
-    Write(Stringify(result));
-
-
-
-
-    var deleteem = api.createBatch('DataExtensionObject', objs);
-
-    //var deResults = api.retrieve("DataExtension", deCols, filterAll);
     
+    //Write(objs.length);
+    //Write("\r\n");Write("\n\r");//new lines are sometimes \r\n and sometimes BR I think it depends on page type. 
+    //Write("<br><br>");
+    //Write(result.length);
+    //Write("<br><br>");
+    //</br></br>Write(Stringify(objs));Write("\r\n");Write("\r\n");
 
-    if (false) {//result
+    if(upsertToDE){
+        var options = {SaveOptions: [{'PropertyName': '*', SaveAction: 'UpdateAdd'}]};
+        var deleteem = api.updateBatch('DataExtensionObject', objs, options);
+        //Write(Stringify(deleteem));
+    }
+    
+    if (result) {//result
         for (var i = 0; i < result.length; i++) {
             var de = result[i];
 
@@ -117,7 +138,7 @@ try {
                 RightOperand: {
                     Property: "Name",
                     SimpleOperator: "equals",
-                    Value: "DateAdded"
+                    Value: fieldToFind
                 }
             };
 
