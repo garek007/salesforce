@@ -1,19 +1,27 @@
 %%[
-SET @rr = CreateObject("RetrieveRequest")
-SetObjectProperty(@rr,"ObjectType","Account")
-AddObjectArrayItem(@rr,"Properties","Name")
-AddObjectArrayItem(@rr,"Properties","ID")
-/*
-AddObjectArrayItem(@rr,"Properties","ParentID")
-AddObjectArrayItem(@rr,"Properties","PartnerKey")
-AddObjectArrayItem(@rr,"Properties","Client.PartnerClientKey")
-AddObjectArrayItem(@rr,"Properties","AccountType")
-*/
-SetObjectProperty(@rr,"QueryAllAccounts",1)
-SET @sfp = CreateObject("SimpleFilterPart")
-SetObjectProperty(@sfp,"Property","ParentID")
-SetObjectProperty(@sfp,"SimpleOperator","equals")
-AddObjectArrayItem(@sfp,"Value","100006781")
-SetObjectProperty(@rr,"Filter",@sfp)
-SET @businessUnits = InvokeRetrieve(@rr)
+    SET @rr = CreateObject("RetrieveRequest")
+    SetObjectProperty(@rr,"ObjectType","Account")
+    AddObjectArrayItem(@rr,"Properties","Name")
+    AddObjectArrayItem(@rr,"Properties","ID")
+    /*
+    AddObjectArrayItem(@rr,"Properties","ParentID")
+    AddObjectArrayItem(@rr,"Properties","PartnerKey")
+    AddObjectArrayItem(@rr,"Properties","Client.PartnerClientKey")
+    AddObjectArrayItem(@rr,"Properties","AccountType")
+    */
+    SetObjectProperty(@rr,"QueryAllAccounts",1)
+    SET @sfp = CreateObject("SimpleFilterPart")
+    SetObjectProperty(@sfp,"Property","ParentID")
+    SetObjectProperty(@sfp,"SimpleOperator","equals")
+    AddObjectArrayItem(@sfp,"Value","100006781")
+    SetObjectProperty(@rr,"Filter",@sfp)
+    SET @businessUnits = InvokeRetrieve(@rr)
+
+    IF RowCount(@businessUnits) > 0 THEN
+        Output(Concat('<table ','width="100%"','>'))
+        FOR @i = 1 to RowCount(@businessUnits) DO
+            Output(Concat('<tr><td>',Field(@row,'Name'),'</td><td>',Field(@row,'ID'),'</td></tr>'))
+        NEXT @i
+        Output(Concat('</table','>'))
+    ENDIF
 ]%%
