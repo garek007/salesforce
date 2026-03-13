@@ -4,3 +4,5 @@ Pretty sure I borrowed the ssjs ampscript functions code from [email360 lib](htt
 [This one](https://github.com/ttntm/sfmc-utils/blob/main/src/retrieveSalesforceObject.js) is also good
 
 But I like the email360 one more. 
+
+The WSProxy functions also has some functions for cleaning street address.
